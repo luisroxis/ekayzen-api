@@ -9,7 +9,7 @@
     "build": "tsc",
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules src/server.ts",
     "typeorm": "ts-node-dev node_modules/typeorm/cli.js",
-    "test": "NODE_ENV=test jest -i"
+    "test": "jest"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
