@@ -30,7 +30,7 @@ export class CreateCompany1615479374436 implements MigrationInterface {
               },
               {
                 name: "size",
-                type: "varchar"
+                type: "int"
               },
               {
                 name: "employees",

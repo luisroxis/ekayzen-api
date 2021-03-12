@@ -8,6 +8,6 @@ companyRouter.post('/', companyController.store)
 companyRouter.get('/', companyController.index)
 companyRouter.get('/:id', companyController.show)
 companyRouter.put('/:id', companyController.update)
-companyRouter.delete('/:id', companyController.destroy)
+companyRouter.delete('/:id', companyController.remove)
 
 export default companyRouter
