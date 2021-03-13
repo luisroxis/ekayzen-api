@@ -26,7 +26,7 @@ describe("Companies", ()=> {
   })
 
   it("Should be able to create a new company", async ()=>{
-    const response = await request(app).post("/companies")
+    const response = await request(app).post('/companies')
     .send({
       name: "FulanoTech",  
       email:"contato@fulano.tech", 
@@ -43,10 +43,7 @@ describe("Companies", ()=> {
       city:"São Paulo",
       state:"SP",
     });
-
-    console.log(response)
-
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(201)
   })
 
   it("Should not be able to create a company that already exists", async ()=> {
@@ -66,8 +63,7 @@ describe("Companies", ()=> {
       district:"Vila Irmãos Arnoni",
       city:"São Paulo",
       state:"SP"
-    })
-    
+    })    
     expect(response.status).toBe(400)
   })
 })

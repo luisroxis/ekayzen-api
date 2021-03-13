@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PORT: '3333'
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - uses: actions/checkout@v2
+      - name: Run Tests
+        run: |
+          yarn
+          yarn test
+      - uses: codecov/codecov-action@v1
+        with:
+          directory: ./src/__tests__/

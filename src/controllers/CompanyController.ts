@@ -5,28 +5,22 @@ import * as Yup from 'yup'
 
 import {Company} from '../database/entities/Company'
 import {Address} from '../database/entities/Address'
-import { validate } from 'uuid';
 
 
 class CompanyController {
- 
+ /** Create */
   async store(request: Request, response: Response) {
-    const data = request.body;
+    
     const companyRepository = getRepository(Company)
     const addressRepository = getRepository(Address)
+    const data = request.body;
+
     const companyExists = await companyRepository.findOne({
       where: {'cnpj': data.cnpj}
     })
 
 
-    if(companyExists) {
-      console.log(companyExists.id)
-      
-      const address = await addressRepository.findOne({
-        where: {'id': String(companyExists.id)}
-      })
-
-      console.log(address)
+    if(companyExists) {      
       throw new AppError('Company already registered')
     }
 
@@ -84,6 +78,7 @@ class CompanyController {
     return response.status(201).json({company, addressCompany});
   }
 
+  /** List */
   async index(request: Request, response: Response) {
     const companyRepository = getRepository(Company)
 
@@ -92,13 +87,61 @@ class CompanyController {
     return response.json(companies)
   }
 
+  /** Show */
   async show(request: Request, response: Response) {
     const companyRepository = getRepository(Company)
+    const addressRepository = getRepository(Address)
 
     const {id} = request.params
 
+    
+    const company = await companyRepository.findOne({
+      where: {'id': String(id)}
+    })
+    const address = await addressRepository.findOne({
+      where: {'companyId': String(id)}
+    })
+
+    if(!company) {
+      throw new AppError('Company not found')
+    }
+
+    return response.json({company, address})
+  }
+
+  /** Update */
+  async update(request: Request, response: Response) {
+    const companyRepository = getRepository(Company)
+    const addressRepository = getRepository(Address)
+
+    const data = request.body;
+    const {id} = request.params    
+
+    const company = await companyRepository.findOne({
+      where: {'id': String(id)}
+    })
+
+    const address = await addressRepository.findOne({
+      where: {'companyId': String(id)}
+    })
+
+    if(!company) {
+      throw new AppError('Company not registered')
+    }
     const companySchema = Yup.object().shape({
-      id: Yup.string().required('ID Obrigatorio').uuid()
+      name: Yup.string().required('Nome Obrigatorio'),
+      email: Yup.string().required('Email Obrigatorio').email(),      
+      telephone1: Yup.string().required('Telefone Principal Obrigatorio'),
+      size: Yup.number().required('Tamanho da Empresa Obrigatorio'),
+      employees: Yup.number().required('Quantidade de Funcionarios Obrigatorio'),
+      nameResp: Yup.string().required('Nome de Responsavel Obrigatorio'),
+      emailResp: Yup.string().required('Email do Responsavel Obrigatorio').email(),
+      telResp: Yup.string().required('Telefone Responsavel Obrigatorio'),
+      zipCode: Yup.string().required('CEP Obrigatorio'),
+      address: Yup.string().required('Endereço Obrigatorio'),
+      district: Yup.string().required('Bairro Obrigatorio'),
+      city: Yup.string().required('Cidade Obrigatorio'),
+      state: Yup.string().required('Estado Obrigatorio')
     })
 
     try {
@@ -108,20 +151,37 @@ class CompanyController {
         error: err
       })
     }
-
-    const company = await companyRepository.findOne({
-      where: {'id': String(id)}
+  
+    const newCompany = companyRepository.merge(
+      company,{
+      name: data.name,
+      email: data.email,
+      telephone1: data.telephone1,
+      size: data.size,
+      employees: data.employees,
+      nameResp: data.nameResp,
+      emailResp: data.emailResp,
+      telResp: data.telResp
     })
 
-    if(!company) {
-      throw new AppError('Company not found')
-    }
+    await companyRepository.save(newCompany)
+    
+    const newAddressCompany = addressRepository.merge(
+      address, {      
+      zipCode:data.zipCode,
+      address: data.address,
+      district: data.district,
+      city: data.city,
+      state: data.state,
+    })
 
-    return response.json(company)
+    await addressRepository.save(newAddressCompany)    
+
+    return response.status(201).json({newCompany, newAddressCompany});
+
   }
 
-  async update() {}
-
+  /** Delete */
   async remove(request: Request, response: Response) {
     const companyRepository = getRepository(Company)
 
@@ -135,11 +195,15 @@ class CompanyController {
       throw new AppError('Company not registered')
     }
 
-    await companyRepository.delete({
+    const deleted = await companyRepository.delete({
       id: String(id)
     })
 
-    return response.status(200)
+    if(deleted.affected !== null){     
+      return response.send()
+      } else {     
+        throw new AppError('Company not deleted')
+      }
   }
 
 }
