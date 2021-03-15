@@ -4,6 +4,7 @@ import { AppError } from '../error/AppError';
 import * as Yup from 'yup'
 
 import {Product} from '../database/entities/Product'
+import { Company } from '../database/entities/Company';
 
 class ProductController {
   /** Create */ 
@@ -48,22 +49,42 @@ class ProductController {
 
     return response.json(products)
   }
+ 
 
   /** Show */
   async show(request: Request, response: Response) {
     const productRepository = getRepository(Product)
+    const companyRepository = getRepository(Company)   
 
     const { id } = request.params
+    const {companyId} = request.query
 
     const product = await productRepository.findOne({
       where: {'id': String(id)}
+    })
+    const company = await companyRepository.findOne({
+      where: {'id': String(companyId)}
     })      
 
     if(!product) {
       throw new AppError('Product not found')
     }
+    let productValue = 0
 
-    return response.json(product)
+    if(company?.size === 1){
+      productValue = product.valuePp
+    } else if(company?.size === 2) {
+      productValue = product.valueMp
+    } else if(company?.size === 3) {
+      productValue = product.valueGp
+    }
+
+    const prod = {}
+    prod.id = product.id
+    prod.description = product.description
+    prod.value = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(productValue)    
+
+    return response.json(prod)
   }
 
   /** Update */

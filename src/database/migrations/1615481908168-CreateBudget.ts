@@ -16,7 +16,7 @@ export class CreateBudget1615481908168 implements MigrationInterface {
                 type: "uuid"
               },
               {
-                name: "typefold",
+                name: "typeSale",
                 type: "int",
               },              
               {
@@ -33,7 +33,12 @@ export class CreateBudget1615481908168 implements MigrationInterface {
               },
               {
                 name: "amount",
-                type: "float"
+                type: "float",
+                isNullable: true,
+              },
+              {
+                name: "status",
+                type: "int"
               },
               {
                 name: "created_at",
